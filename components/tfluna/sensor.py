@@ -9,9 +9,9 @@ from esphome.const import (
 DEPENDENCIES = ["i2c"]
 CODEOWNERS = ["@daniel-beard"]
 
-zio_ultrasonic_ns = cg.esphome_ns.namespace("tfluna")
+tfluna_ns = cg.esphome_ns.namespace("tfluna")
 
-TFLunaComponent = tfluna.class_(
+TFLunaComponent = tfluna_ns.class_(
     "TFLuna", cg.PollingComponent, i2c.I2CDevice, sensor.Sensor
 )
 
