@@ -6,9 +6,11 @@
 namespace esphome {
 namespace tfluna {
 
+// see https://files.waveshare.com/upload/a/ac/SJ-PM-TF-Luna_A05_Product_Manual.pdf
 static const char *const TAG = "tfluna";
 static const unsigned char DATA[] = {0x5A,0x05,0x00,0x01,0x60};
-static const size_t DATA_LENGTH = 9;
+static const size_t DATA_LENGTH = 5;
+static const size_t RESPONSE_LENGTH = 9;
 
 void TFLuna::dump_config() {
   ESP_LOGCONFIG(TAG, "TF-Luna (i2c):");
@@ -24,8 +26,8 @@ void TFLuna::update() {
   }
 
   this->set_timeout("read_distance", 1000, [this]() {
-    uint8_t i2c_response[DATA_LENGTH];
-    if (this->read(i2c_response, DATA_LENGTH) != i2c::ERROR_OK) {
+    uint8_t i2c_response[RESPONSE_LENGTH];
+    if (this->read(i2c_response, RESPONSE_LENGTH) != i2c::ERROR_OK) {
       this->status_set_warning();
       return;
     }
