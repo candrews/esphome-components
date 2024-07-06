@@ -31,7 +31,7 @@ void TFLuna::update() {
     }
 
     uint16_t distance = i2c_response[2] + i2c_response[3] * 256;
-    ESP_LOGD(TAG, "Got distance=%lldl cm", distance);
+    ESP_LOGD(TAG, "Got distance=%d cm", distance);
     this->publish_state(distance);
     this->status_clear_warning();
   });
