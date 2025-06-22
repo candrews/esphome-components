@@ -9,6 +9,8 @@ namespace tfluna {
 
 class TFLuna : public i2c::I2CDevice, public PollingComponent, public sensor::Sensor {
  public:
+  void setup override;
+
   float get_setup_priority() const override { return setup_priority::DATA; }
 
   void dump_config() override;
