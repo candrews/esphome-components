@@ -64,7 +64,7 @@ void TFLuna::update() {
     return;
   }
 
-  this->set_timeout("read_distance", 1000, [this]() {
+  this->set_timeout("read_distance", 50, [this]() {
     uint8_t distance_low;
     if (! this->read_byte(DISTANCE_LOW_REGISTER, &distance_low)) {
       ESP_LOGE(TAG, "Failed to get distance low");
