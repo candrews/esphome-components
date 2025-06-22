@@ -81,14 +81,6 @@ void TFLuna::update() {
     }
     uint16_t distance = distance_low + distance_high * 256;
 
-    uint8_t i2c_response[RESPONSE_LENGTH];
-    auto read_error = this->read(i2c_response, RESPONSE_LENGTH);
-    if (read_error != i2c::ERROR_OK) {
-      ESP_LOGW(TAG, "Error reading data: %d", read_error);
-      this->status_set_warning();
-      return;
-    }
-
     ESP_LOGD(TAG, "Got distance=%d cm", distance);
     this->publish_state(distance);
     this->status_clear_warning();
