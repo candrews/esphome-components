@@ -7,9 +7,9 @@ namespace esphome {
 namespace tfluna {
 
 // see https://files.waveshare.com/upload/a/ac/SJ-PM-TF-Luna_A05_Product_Manual.pdf
-static const unint8_t VERSION_REVISION = 0x0A;
-static const unint8_t VERSION_MINOR = 0x0B;
-static const unint8_t VERSION_MAJOR = 0x0C;
+static const uint8_t VERSION_REVISION = 0x0A;
+static const uint8_t VERSION_MINOR = 0x0B;
+static const uint8_t VERSION_MAJOR = 0x0C;
 static const char *const TAG = "tfluna";
 static const unsigned char DATA[] = {0x5A,0x05,0x00,0x01,0x60};
 static const size_t DATA_LENGTH = 5;
