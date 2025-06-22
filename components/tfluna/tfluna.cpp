@@ -7,9 +7,15 @@ namespace esphome {
 namespace tfluna {
 
 // see https://files.waveshare.com/upload/a/ac/SJ-PM-TF-Luna_A05_Product_Manual.pdf
-static const uint8_t VERSION_REVISION = 0x0A;
-static const uint8_t VERSION_MINOR = 0x0B;
-static const uint8_t VERSION_MAJOR = 0x0C;
+static const uint8_t VERSION_REVISION_REGISTER = 0x0A;
+static const uint8_t VERSION_MINOR_REGISTER = 0x0B;
+static const uint8_t VERSION_MAJOR_REGISTER = 0x0C;
+static const uint8_t DISTANCE_LOW_REGISTER = 0x00;
+static const uint8_t DISTANCE_HIGH_REGISTER = 0x01;
+static const uint8_t MODE_REGISTER = 0x23;
+static const uint8_t MODE_CONTINUOUS = 0x00;
+static const uint8_t MODE_TRIGGER = 0x01;
+static const uint8_t TRIGGER_ONESHOT_REGISTER = 0x24;
 static const char *const TAG = "tfluna";
 static const unsigned char DATA[] = {0x5A,0x05,0x00,0x01,0x60};
 static const size_t DATA_LENGTH = 5;
@@ -25,39 +31,63 @@ void TFLuna::dump_config() {
 void TFLuna::setup() {
   ESP_LOGI(TAG, "Setting up TFLuna...");
   uint8_t major;
-  if (this->read_register(VERSION_MAJOR, &major, 1) !=
+  if (this->read_register(VERSION_MAJOR_REGISTER, &major, 1) !=
       i2c::ERROR_OK) {
-    ESP_LOGE(TAG, "TFLuna Setup Failed");
+    ESP_LOGE(TAG, "Failed to get major firmware version");
     this->mark_failed();
     return;
   }
   uint8_t minor;
-  if (this->read_register(VERSION_MINOR, &minor, 1) !=
+  if (this->read_register(VERSION_MINOR_REGISTER, &minor, 1) !=
       i2c::ERROR_OK) {
-    ESP_LOGE(TAG, "TFLuna Setup Failed");
+    ESP_LOGE(TAG, "Failed to get minor firmware version");
     this->mark_failed();
     return;
   }
   uint8_t revision;
-  if (this->read_register(VERSION_REVISION, &revision, 1) !=
+  if (this->read_register(VERSION_REVISION_REGISTER, &revision, 1) !=
       i2c::ERROR_OK) {
-    ESP_LOGE(TAG, "TFLuna Setup Failed");
+    ESP_LOGE(TAG, "Failed to get revision firmware version");
     this->mark_failed();
     return;
   }
-  ESP_LOGI(TAG, "MiniEncoderC Firmware: %d.%d.%d", major, minor, revision);
+  ESP_LOGI(TAG, "TFLuna Firmware: %d.%d.%d", major, minor, revision);
+
+  if (this->write_register(MODE_REGISTER, MODE_TRIGGER, 1) !=
+      i2c::ERROR_OK) {
+    ESP_LOGE(TAG, "Failed to set mode to trigger mode");
+    this->mark_failed();
+    return;
+  }
 }
 
 void TFLuna::update() {
   this->setup();
 
-  auto write_error = this->write(DATA, DATA_LENGTH);
-  if (write_error != i2c::ERROR_OK) {
-    ESP_LOGD(TAG, "Error writing data: %d", write_error);
+  if (this->write_register(TRIGGER_ONESHOT_REGISTER, 0x01, 1) !=
+      i2c::ERROR_OK) {
+    ESP_LOGE(TAG, "Failed to trigger a oneshot");
+    this->status_set_warning();
     return;
   }
 
   this->set_timeout("read_distance", 1000, [this]() {
+    uint8_t distance_low;
+    if (this->read_register(DISTANCE_LOW_REGISTER, &distance_low, 1) !=
+        i2c::ERROR_OK) {
+      ESP_LOGE(TAG, "Failed to get distance low");
+      this->status_set_warning();
+      return;
+    }
+    uint8_t distance_high;
+    if (this->read_register(DISTANCE_HIGH_REGISTER, &distance_high, 1) !=
+        i2c::ERROR_OK) {
+      ESP_LOGE(TAG, "Failed to get distance high");
+      this->status_set_warning();
+      return;
+    }
+    uint16_t distance = distance_low + distance_high * 256;
+
     uint8_t i2c_response[RESPONSE_LENGTH];
     auto read_error = this->read(i2c_response, RESPONSE_LENGTH);
     if (read_error != i2c::ERROR_OK) {
@@ -66,7 +96,6 @@ void TFLuna::update() {
       return;
     }
 
-    uint16_t distance = i2c_response[2] + i2c_response[3] * 256;
     ESP_LOGD(TAG, "Got distance=%d cm", distance);
     this->publish_state(distance);
     this->status_clear_warning();
