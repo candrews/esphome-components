@@ -30,7 +30,7 @@ void TFLuna::update() {
   this->set_timeout("read_distance", 1000, [this]() {
     uint8_t i2c_response[RESPONSE_LENGTH];
     auto read_error = this->read(i2c_response, RESPONSE_LENGTH);
-    if read_error != i2c::ERROR_OK) {
+    if (read_error != i2c::ERROR_OK) {
       ESP_LOGD(TAG, "Error reading data: %d", read_error);
       this->status_set_warning();
       return;
