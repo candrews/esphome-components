@@ -20,6 +20,7 @@ void TFLuna::dump_config() {
 }
 
 void TFLuna::update() {
+  ESP_LOGD(TAG, "TFLuna::update");
 
   auto write_error = this->write(DATA, DATA_LENGTH);
   if (write_error != i2c::ERROR_OK) {
