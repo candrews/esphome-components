@@ -55,6 +55,8 @@ void TFLuna::setup() {
     this->mark_failed();
     return;
   }
+
+    this->mark_failed();
 }
 
 void TFLuna::update() {
