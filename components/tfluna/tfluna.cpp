@@ -49,6 +49,7 @@ void TFLuna::setup() {
 }
 
 void TFLuna::update() {
+  this->setup();
 
   auto write_error = this->write(DATA, DATA_LENGTH);
   if (write_error != i2c::ERROR_OK) {
