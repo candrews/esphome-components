@@ -21,13 +21,17 @@ void TFLuna::dump_config() {
 
 void TFLuna::update() {
 
-  if (this->write(DATA, DATA_LENGTH) != i2c::ERROR_OK) {
+  auto write_error = this->write(DATA, DATA_LENGTH);
+  if (write_error != i2c::ERROR_OK) {
+    ESP_LOGD(TAG, "Error writing data: %d", write_error);
     return;
   }
 
   this->set_timeout("read_distance", 1000, [this]() {
     uint8_t i2c_response[RESPONSE_LENGTH];
-    if (this->read(i2c_response, RESPONSE_LENGTH) != i2c::ERROR_OK) {
+    auto read_error = this->read(i2c_response, RESPONSE_LENGTH);
+    if read_error != i2c::ERROR_OK) {
+      ESP_LOGD(TAG, "Error reading data: %d", read_error);
       this->status_set_warning();
       return;
     }
