@@ -58,8 +58,6 @@ void TFLuna::setup() {
 }
 
 void TFLuna::update() {
-  this->setup();
-
   if (! this->write_byte(TRIGGER_ONESHOT_REGISTER, 0x01)) {
     ESP_LOGE(TAG, "Failed to trigger a oneshot");
     this->status_set_warning();
