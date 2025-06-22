@@ -53,7 +53,7 @@ void TFLuna::setup() {
   }
   ESP_LOGI(TAG, "TFLuna Firmware: %d.%d.%d", major, minor, revision);
 
-  if (this->write_register(MODE_REGISTER, MODE_TRIGGER, 1) !=
+  if (this->write_byte(MODE_REGISTER, MODE_TRIGGER, 1) !=
       i2c::ERROR_OK) {
     ESP_LOGE(TAG, "Failed to set mode to trigger mode");
     this->mark_failed();
@@ -64,7 +64,7 @@ void TFLuna::setup() {
 void TFLuna::update() {
   this->setup();
 
-  if (this->write_register(TRIGGER_ONESHOT_REGISTER, 0x01, 1) !=
+  if (this->write_byte(TRIGGER_ONESHOT_REGISTER, 0x01, 1) !=
       i2c::ERROR_OK) {
     ESP_LOGE(TAG, "Failed to trigger a oneshot");
     this->status_set_warning();
