@@ -31,30 +31,26 @@ void TFLuna::dump_config() {
 void TFLuna::setup() {
   ESP_LOGI(TAG, "Setting up TFLuna...");
   uint8_t major;
-  if (this->read_register(VERSION_MAJOR_REGISTER, &major, 1) !=
-      i2c::ERROR_OK) {
+  if (! this->read_byte(VERSION_MAJOR_REGISTER, &major)) {
     ESP_LOGE(TAG, "Failed to get major firmware version");
     this->mark_failed();
     return;
   }
   uint8_t minor;
-  if (this->read_register(VERSION_MINOR_REGISTER, &minor, 1) !=
-      i2c::ERROR_OK) {
+  if (! this->read_byte(VERSION_MINOR_REGISTER, &minor)) {
     ESP_LOGE(TAG, "Failed to get minor firmware version");
     this->mark_failed();
     return;
   }
   uint8_t revision;
-  if (this->read_register(VERSION_REVISION_REGISTER, &revision, 1) !=
-      i2c::ERROR_OK) {
+  if (! this->read_byte(VERSION_REVISION_REGISTER, &revision)) {
     ESP_LOGE(TAG, "Failed to get revision firmware version");
     this->mark_failed();
     return;
   }
   ESP_LOGI(TAG, "TFLuna Firmware: %d.%d.%d", major, minor, revision);
 
-  if (this->write_byte(MODE_REGISTER, MODE_TRIGGER, 1) !=
-      i2c::ERROR_OK) {
+  if (! this->write_byte(MODE_REGISTER, MODE_TRIGGER)) {
     ESP_LOGE(TAG, "Failed to set mode to trigger mode");
     this->mark_failed();
     return;
@@ -64,8 +60,7 @@ void TFLuna::setup() {
 void TFLuna::update() {
   this->setup();
 
-  if (this->write_byte(TRIGGER_ONESHOT_REGISTER, 0x01, 1) !=
-      i2c::ERROR_OK) {
+  if (! this->write_byte(TRIGGER_ONESHOT_REGISTER, 0x01)) {
     ESP_LOGE(TAG, "Failed to trigger a oneshot");
     this->status_set_warning();
     return;
@@ -73,15 +68,13 @@ void TFLuna::update() {
 
   this->set_timeout("read_distance", 1000, [this]() {
     uint8_t distance_low;
-    if (this->read_register(DISTANCE_LOW_REGISTER, &distance_low, 1) !=
-        i2c::ERROR_OK) {
+    if (! this->read_byte(DISTANCE_LOW_REGISTER, &distance_low)) {
       ESP_LOGE(TAG, "Failed to get distance low");
       this->status_set_warning();
       return;
     }
     uint8_t distance_high;
-    if (this->read_register(DISTANCE_HIGH_REGISTER, &distance_high, 1) !=
-        i2c::ERROR_OK) {
+    if (! this->read_byte(DISTANCE_HIGH_REGISTER, &distance_high, 1)) {
       ESP_LOGE(TAG, "Failed to get distance high");
       this->status_set_warning();
       return;
@@ -91,7 +84,7 @@ void TFLuna::update() {
     uint8_t i2c_response[RESPONSE_LENGTH];
     auto read_error = this->read(i2c_response, RESPONSE_LENGTH);
     if (read_error != i2c::ERROR_OK) {
-      ESP_LOGD(TAG, "Error reading data: %d", read_error);
+      ESP_LOGW(TAG, "Error reading data: %d", read_error);
       this->status_set_warning();
       return;
     }
