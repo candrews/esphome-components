@@ -7,6 +7,9 @@ namespace esphome {
 namespace tfluna {
 
 // see https://files.waveshare.com/upload/a/ac/SJ-PM-TF-Luna_A05_Product_Manual.pdf
+static const unint8_t VERSION_REVISION = 0x0A;  # R
+static const unint8_t VERSION_MINOR = 0x0B;  # R
+static const unint8_t VERSION_MAJOR = 0x0C;  # R
 static const char *const TAG = "tfluna";
 static const unsigned char DATA[] = {0x5A,0x05,0x00,0x01,0x60};
 static const size_t DATA_LENGTH = 5;
@@ -19,8 +22,33 @@ void TFLuna::dump_config() {
   LOG_SENSOR("  ", "Sensor:", this);
 }
 
+void TFLuna::setup() {
+  ESP_LOGI(TAG, "Setting up TFLuna...");
+  uint8_t major;
+  if (this->read_register(VERSION_MAJOR, &major, 1) !=
+      i2c::ERROR_OK) {
+    ESP_LOGE(TAG, "TFLuna Setup Failed");
+    this->mark_failed();
+    return;
+  }
+  uint8_t minor;
+  if (this->read_register(VERSION_MINOR, &minor, 1) !=
+      i2c::ERROR_OK) {
+    ESP_LOGE(TAG, "TFLuna Setup Failed");
+    this->mark_failed();
+    return;
+  }
+  uint8_t revision;
+  if (this->read_register(VERSION_REVISION, &revision, 1) !=
+      i2c::ERROR_OK) {
+    ESP_LOGE(TAG, "TFLuna Setup Failed");
+    this->mark_failed();
+    return;
+  }
+  ESP_LOGI(TAG, "MiniEncoderC Firmware: %d.%d.%d", major, minor, revision);
+}
+
 void TFLuna::update() {
-  ESP_LOGD(TAG, "TFLuna::update");
 
   auto write_error = this->write(DATA, DATA_LENGTH);
   if (write_error != i2c::ERROR_OK) {
