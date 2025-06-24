@@ -16,7 +16,7 @@ namespace tfluna {
 class TFLuna : public i2c::I2CDevice, public PollingComponent {
 #ifdef USE_SENSOR
   SUB_SENSOR(distance)
-  SUB_SENSOR(temperaure)
+  SUB_SENSOR(temperature)
   SUB_SENSOR(signal_strength)
 #endif
 #ifdef USE_TEXT_SENSOR
