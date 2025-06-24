@@ -1,13 +1,27 @@
 #pragma once
 
+#include "esphome/core/defines.h"
 #include "esphome/core/component.h"
+#ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
+#endif
+#ifdef USE_NUMBER
+#include "esphome/components/number/number.h"
+#endif
 #include "esphome/components/i2c/i2c.h"
 
 namespace esphome {
 namespace tfluna {
 
-class TFLuna : public i2c::I2CDevice, public PollingComponent, public sensor::Sensor {
+class TFLuna : public i2c::I2CDevice, public PollingComponent {
+#ifdef USE_SENSOR
+  SUB_SENSOR(distance)
+  SUB_SENSOR(temperaure)
+  SUB_SENSOR(signal_strength)
+#endif
+#ifdef USE_TEXT_SENSOR
+  SUB_TEXT_SENSOR(version)
+#endif
  public:
   void setup() override;
 

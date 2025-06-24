@@ -10,6 +10,10 @@ namespace tfluna {
 static const uint8_t VERSION_REVISION_REGISTER = 0x0A;
 static const uint8_t VERSION_MINOR_REGISTER = 0x0B;
 static const uint8_t VERSION_MAJOR_REGISTER = 0x0C;
+static const uint8_t AMP_LOW_REGISTER = 0x02;
+static const uint8_t AMP_HIGH_REGISTER = 0x03;
+static const uint8_t TEMPERATURE_LOW_REGISTER = 0x04;
+static const uint8_t TEMPERATURE_HIGH_REGISTER = 0x05;
 static const uint8_t DISTANCE_LOW_REGISTER = 0x00;
 static const uint8_t DISTANCE_HIGH_REGISTER = 0x01;
 static const uint8_t MODE_REGISTER = 0x23;
@@ -48,7 +52,12 @@ void TFLuna::setup() {
     this->mark_failed();
     return;
   }
-  ESP_LOGI(TAG, "TFLuna Firmware: %d.%d.%d", major, minor, revision);
+  auto version = str_sprintf("%d.%d.%d", major, minor, revision)
+  ESP_LOGI(TAG, "TFLuna Firmware: %s", version);
+
+  if (this->version_text_sensor_ != nullptr) {
+    this->version_text_sensor_->publish_state(version);
+  }
 
   if (! this->write_byte(MODE_REGISTER, MODE_TRIGGER)) {
     ESP_LOGE(TAG, "Failed to set mode to trigger mode");
@@ -64,23 +73,66 @@ void TFLuna::update() {
     return;
   }
 
-  this->set_timeout("read_distance", 50, [this]() {
-    uint8_t distance_low;
-    if (! this->read_byte(DISTANCE_LOW_REGISTER, &distance_low)) {
-      ESP_LOGE(TAG, "Failed to get distance low");
-      this->status_set_warning();
-      return;
-    }
-    uint8_t distance_high;
-    if (! this->read_byte(DISTANCE_HIGH_REGISTER, &distance_high, 1)) {
-      ESP_LOGE(TAG, "Failed to get distance high");
-      this->status_set_warning();
-      return;
-    }
-    uint16_t distance = distance_low + distance_high * 256;
+  // tfluna needs time after it is triggered to have data available
+  this->set_timeout(50, [this]() {
+  #ifdef USE_SENSOR
+    if (this->distance_sensor_ != nullptr) {
+      uint8_t distance_low;
+      if (! this->read_byte(DISTANCE_LOW_REGISTER, &distance_low)) {
+        ESP_LOGE(TAG, "Failed to get distance low");
+        this->status_set_warning();
+        return;
+      }
+      uint8_t distance_high;
+      if (! this->read_byte(DISTANCE_HIGH_REGISTER, &distance_high, 1)) {
+        ESP_LOGE(TAG, "Failed to get distance high");
+        this->status_set_warning();
+        return;
+      }
+      uint16_t distance = distance_low + distance_high * 256;
 
-    ESP_LOGD(TAG, "Got distance=%d cm", distance);
-    this->publish_state(distance);
+      ESP_LOGD(TAG, "Got distance=%d cm", distance);
+      this->distance_sensor_->publish_state(distance);
+    }
+
+    if (this->temperature_sensor_ != nullptr) {
+      uint8_t temperature_low;
+      if (! this->read_byte(TEMPERATURE_LOW_REGISTER, &temperature_low)) {
+        ESP_LOGE(TAG, "Failed to get temperature low");
+        this->status_set_warning();
+        return;
+      }
+      uint8_t temperature_high;
+      if (! this->read_byte(TEMPERATURE_HIGH_REGISTER, &temperature_high, 1)) {
+        ESP_LOGE(TAG, "Failed to get temperature high");
+        this->status_set_warning();
+        return;
+      }
+      float temperature = (temperature_low + temperature_high * 256) / 100f;
+
+      ESP_LOGD(TAG, "Got temperature=%f degrees celsius", temperature);
+      this->temperature_sensor_->publish_state(temperature);
+    }
+
+    if (this->signal_strength_sensor_ != nullptr) {
+      uint8_t signal_strength_low;
+      if (! this->read_byte(AMP_LOW_REGISTER, &signal_strength_low)) {
+        ESP_LOGE(TAG, "Failed to get signal strength low");
+        this->status_set_warning();
+        return;
+      }
+      uint8_t signal_strength_high;
+      if (! this->read_byte(AMP_HIGH_REGISTER, &signal_strength_high, 1)) {
+        ESP_LOGE(TAG, "Failed to get signal strength high");
+        this->status_set_warning();
+        return;
+      }
+      uint16_t signal_strength = signal_strength_low + signal_strength_high * 256;
+
+      ESP_LOGD(TAG, "Got signal strength=%d", signal_strength);
+      this->signal_strength_sensor_->publish_state(signal_strength);
+    }
+  #endif
     this->status_clear_warning();
   });
 }
