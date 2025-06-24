@@ -13,7 +13,7 @@ DEPENDENCIES = ["tfluna"]
 
 CONFIG_SCHEMA = {
 		cv.GenerateID(CONF_TFLUNA_ID): cv.use_id(TFLunaComponent),
-		cv.Optional(CONF_VERSION): text_sensor.sensor_schema(
+		cv.Optional(CONF_VERSION): text_sensor.text.sensor_schema(
 			entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
 			icon=ICON_CHIP
 		),
