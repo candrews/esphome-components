@@ -60,7 +60,7 @@ void TFLuna::setup() {
     this->mark_failed();
     return;
   }
-  auto version = str_sprintf("%d.%d.%d", major, minor, revision)
+  auto version = str_sprintf("%d.%d.%d", major, minor, revision);
   ESP_LOGI(TAG, "TFLuna Firmware: %s", version);
 
 #ifdef USE_TEXT_SENSOR
@@ -118,7 +118,7 @@ void TFLuna::update() {
         this->status_set_warning();
         return;
       }
-      float temperature = (temperature_low + temperature_high * 256) / 100f;
+      float temperature = (temperature_low + temperature_high * 256) / (float) 100;
 
       ESP_LOGD(TAG, "Got temperature=%f degrees celsius", temperature);
       this->temperature_sensor_->publish_state(temperature);

@@ -57,4 +57,4 @@ async def to_code(config):
         cg.add(tfluna_component.set_temperature_sensor(sens))
     if signal_strength_config := config.get(CONF_SIGNAL_STRENGTH):
         sens = await sensor.new_sensor(signal_strength_config)
-        cg.add(tfluna_component.set_signal_sensor(sens))
+        cg.add(tfluna_component.set_signal_strength_sensor(sens))
