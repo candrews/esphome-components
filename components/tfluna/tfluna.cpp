@@ -29,7 +29,15 @@ void TFLuna::dump_config() {
   ESP_LOGCONFIG(TAG, "TF-Luna (i2c):");
   LOG_I2C_DEVICE(this);
   LOG_UPDATE_INTERVAL(this);
-  LOG_SENSOR("  ", "Sensor:", this);
+
+#ifdef USE_SENSOR
+  LOG_SENSOR("  ", "Distance:", this->distance_sensor_);
+  LOG_SENSOR("  ", "Temperature:", this->temperature_sensor_);
+  LOG_SENSOR("  ", "Signal Strength:", this->signal_strength_sensor_);
+#endif
+#ifdef USE_TEXT_SENSOR
+  LOG_TEXT_SENSOR("  ", "Version", this->version_text_sensor_);
+#endif
 }
 
 void TFLuna::setup() {
