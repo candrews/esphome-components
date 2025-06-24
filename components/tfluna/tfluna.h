@@ -5,8 +5,8 @@
 #ifdef USE_SENSOR
 #include "esphome/components/sensor/sensor.h"
 #endif
-#ifdef USE_NUMBER
-#include "esphome/components/number/number.h"
+#ifdef USE_TEXT_SENSOR
+#include "esphome/components/text_sensor/text_sensor.h"
 #endif
 #include "esphome/components/i2c/i2c.h"
 

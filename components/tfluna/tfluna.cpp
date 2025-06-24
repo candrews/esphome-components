@@ -55,9 +55,11 @@ void TFLuna::setup() {
   auto version = str_sprintf("%d.%d.%d", major, minor, revision)
   ESP_LOGI(TAG, "TFLuna Firmware: %s", version);
 
+#ifdef USE_TEXT_SENSOR
   if (this->version_text_sensor_ != nullptr) {
     this->version_text_sensor_->publish_state(version);
   }
+#endif
 
   if (! this->write_byte(MODE_REGISTER, MODE_TRIGGER)) {
     ESP_LOGE(TAG, "Failed to set mode to trigger mode");
