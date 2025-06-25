@@ -69,19 +69,14 @@ void TFLuna::setup() {
   }
 #endif
 
-  if (! this->write_byte(MODE_REGISTER, MODE_TRIGGER)) {
-    ESP_LOGE(TAG, "Failed to set mode to trigger mode");
+  if (! this->write_byte(MODE_REGISTER, MODE_CONTINUOUS)) {
+    ESP_LOGE(TAG, "Failed to set mode to continuous mode");
     this->mark_failed();
     return;
   }
 }
 
 void TFLuna::update() {
-  if (! this->write_byte(TRIGGER_ONESHOT_REGISTER, 0x01)) {
-    ESP_LOGE(TAG, "Failed to trigger a oneshot");
-    this->status_set_warning();
-    return;
-  }
 
 #ifdef USE_SENSOR
   if (this->distance_sensor_ != nullptr) {
