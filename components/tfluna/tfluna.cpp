@@ -83,68 +83,65 @@ void TFLuna::update() {
     return;
   }
 
-  // tfluna needs time after it is triggered to have data available
-  this->set_timeout(50, [this]() {
-  #ifdef USE_SENSOR
-    if (this->distance_sensor_ != nullptr) {
-      uint8_t distance_low;
-      if (! this->read_byte(DISTANCE_LOW_REGISTER, &distance_low)) {
-        ESP_LOGE(TAG, "Failed to get distance low");
-        this->status_set_warning();
-        return;
-      }
-      uint8_t distance_high;
-      if (! this->read_byte(DISTANCE_HIGH_REGISTER, &distance_high, 1)) {
-        ESP_LOGE(TAG, "Failed to get distance high");
-        this->status_set_warning();
-        return;
-      }
-      uint16_t distance = distance_low + distance_high * 256;
-
-      ESP_LOGD(TAG, "Got distance=%d cm", distance);
-      this->distance_sensor_->publish_state(distance);
+#ifdef USE_SENSOR
+  if (this->distance_sensor_ != nullptr) {
+    uint8_t distance_low;
+    if (! this->read_byte(DISTANCE_LOW_REGISTER, &distance_low)) {
+      ESP_LOGE(TAG, "Failed to get distance low");
+      this->status_set_warning();
+      return;
     }
-
-    if (this->temperature_sensor_ != nullptr) {
-      uint8_t temperature_low;
-      if (! this->read_byte(TEMPERATURE_LOW_REGISTER, &temperature_low)) {
-        ESP_LOGE(TAG, "Failed to get temperature low");
-        this->status_set_warning();
-        return;
-      }
-      uint8_t temperature_high;
-      if (! this->read_byte(TEMPERATURE_HIGH_REGISTER, &temperature_high, 1)) {
-        ESP_LOGE(TAG, "Failed to get temperature high");
-        this->status_set_warning();
-        return;
-      }
-      float temperature = (temperature_low + temperature_high * 256) / (float) 100;
-
-      ESP_LOGD(TAG, "Got temperature=%f degrees celsius", temperature);
-      this->temperature_sensor_->publish_state(temperature);
+    uint8_t distance_high;
+    if (! this->read_byte(DISTANCE_HIGH_REGISTER, &distance_high, 1)) {
+      ESP_LOGE(TAG, "Failed to get distance high");
+      this->status_set_warning();
+      return;
     }
+    uint16_t distance = distance_low + distance_high * 256;
 
-    if (this->signal_strength_sensor_ != nullptr) {
-      uint8_t signal_strength_low;
-      if (! this->read_byte(AMP_LOW_REGISTER, &signal_strength_low)) {
-        ESP_LOGE(TAG, "Failed to get signal strength low");
-        this->status_set_warning();
-        return;
-      }
-      uint8_t signal_strength_high;
-      if (! this->read_byte(AMP_HIGH_REGISTER, &signal_strength_high, 1)) {
-        ESP_LOGE(TAG, "Failed to get signal strength high");
-        this->status_set_warning();
-        return;
-      }
-      uint16_t signal_strength = signal_strength_low + signal_strength_high * 256;
+    ESP_LOGD(TAG, "Got distance=%d cm", distance);
+    this->distance_sensor_->publish_state(distance);
+  }
 
-      ESP_LOGD(TAG, "Got signal strength=%d", signal_strength);
-      this->signal_strength_sensor_->publish_state(signal_strength);
+  if (this->temperature_sensor_ != nullptr) {
+    uint8_t temperature_low;
+    if (! this->read_byte(TEMPERATURE_LOW_REGISTER, &temperature_low)) {
+      ESP_LOGE(TAG, "Failed to get temperature low");
+      this->status_set_warning();
+      return;
     }
-  #endif
-    this->status_clear_warning();
-  });
+    uint8_t temperature_high;
+    if (! this->read_byte(TEMPERATURE_HIGH_REGISTER, &temperature_high, 1)) {
+      ESP_LOGE(TAG, "Failed to get temperature high");
+      this->status_set_warning();
+      return;
+    }
+    float temperature = (temperature_low + temperature_high * 256) / (float) 100;
+
+    ESP_LOGD(TAG, "Got temperature=%f degrees celsius", temperature);
+    this->temperature_sensor_->publish_state(temperature);
+  }
+
+  if (this->signal_strength_sensor_ != nullptr) {
+    uint8_t signal_strength_low;
+    if (! this->read_byte(AMP_LOW_REGISTER, &signal_strength_low)) {
+      ESP_LOGE(TAG, "Failed to get signal strength low");
+      this->status_set_warning();
+      return;
+    }
+    uint8_t signal_strength_high;
+    if (! this->read_byte(AMP_HIGH_REGISTER, &signal_strength_high, 1)) {
+      ESP_LOGE(TAG, "Failed to get signal strength high");
+      this->status_set_warning();
+      return;
+    }
+    uint16_t signal_strength = signal_strength_low + signal_strength_high * 256;
+
+    ESP_LOGD(TAG, "Got signal strength=%d", signal_strength);
+    this->signal_strength_sensor_->publish_state(signal_strength);
+  }
+#endif
+  this->status_clear_warning();
 }
 
 }  // namespace tfluna
